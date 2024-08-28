@@ -76,7 +76,7 @@ export default function Home() {
     <div className="grid grid-cols-2 h-screen w-screen">
       <div className="bg-red-500 h-full p-5">
         {foodsList.map((food, index) => (
-            <div className="flex justify-between w-full lg:w-1/2 h-12 text-sm lg:text-md bg-white m-auto mb-5 p-1 lg:p-3" key={index}>
+            <div className="flex justify-between w-full md:w-1/2 h-12 text-sm lg:text-md bg-white m-auto mb-5 p-1 lg:p-3" key={index}>
               <span>{food}</span>
               <button className="w-7 h-7 bg-green-500" onClick={() => addFood(foodsList, index)}>+</button>
             </div>
@@ -85,7 +85,7 @@ export default function Home() {
 
       <div className="bg-blue-500 h-full p-5">
         {userList.map((food, index) => (
-            <div className="flex justify-between w-full lg:w-1/2 h-12 text-sm lg:text-md bg-white m-auto mb-5 p-1 lg:p-3" key={index}>
+            <div className="flex justify-between w-full md:w-1/2 h-12 text-sm lg:text-md bg-white m-auto mb-5 p-1 lg:p-3" key={index}>
               <span>{food.name} x{food.qty}</span>
               <button className="w-7 h-7 bg-red-500" onClick={() => deleteFood(index)}>X</button>
             </div>
