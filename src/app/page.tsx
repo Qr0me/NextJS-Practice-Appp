@@ -1,6 +1,6 @@
 "use client"; // Ensures this is a Client Component
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface FoodItem{
   name: string,
@@ -12,38 +12,87 @@ export default function Home() {
   // State to manage the user's food list
   const [userList, setUserList] = useState<FoodItem[]>([]);
 
-  // Function to add food to the user's list
-  function addFood(foodList: string[], index: number) {
+  async function fetchUserList() {
+    try {
+      const response = await fetch('/api/foods', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-    const foodExists = userList.find(item => item.name === foodList[index])
-
-    if(foodExists){
-      setUserList(userList.map( item =>
-        item.name === foodList[index] ? {...item, qty: item.qty + 1} : item
-      ))
-    } 
-
-    else{
-      const newFood: FoodItem = {
-        name: foodList[index],
-        qty: 1,
+      if (response.ok) {
+        const data = await response.json();
+        setUserList(data.foods);
+      } else {
+        console.error('Failed to load food items');
       }
-  
-      setUserList([...userList, newFood]);
+    } catch (error) {
+      console.error('Error loading food items:', error);
     }
+  }
 
+  // Fetch the user list when the component mounts
+  useEffect(() => {
+    fetchUserList();
+  }, []);
+
+  // Function to add food to the user's list
+  async function addFood(foodList: string[], index: number) {
+    const foodName = foodList[index];
+    const existingFood = userList.find(item => item.name === foodName);
+  
+    if (existingFood) {
+      const updatedUserList = userList.map(item =>
+        item.name === foodName ? { ...item, qty: item.qty + 1 } : item
+      );
+      setUserList(updatedUserList);
+  
+      // Call API to update the database
+      await fetch('/api/foods', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: foodName, qty: 1 }),
+      });
+    } else {
+      const newFood: FoodItem = { name: foodName, qty: 1 };
+      const updatedUserList = [...userList, newFood];
+      setUserList(updatedUserList);
+  
+      // Call API to add the new item to the database
+      await fetch('/api/foods', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newFood),
+      });
+    }
   }
 
   // Function to delete food from user's list
-  function deleteFood(index:number){
-    const deletedFood = userList[index]
-    if(deletedFood.qty > 1){
-      setUserList(userList.map( item =>
-        item === deletedFood ? {...item, qty: item.qty - 1} : item
-      ))
-    }
-    else{
-      setUserList(userList.filter(food => food !== deletedFood))
+  async function deleteFood(index: number) {
+    const foodToDelete = userList[index];
+    if (foodToDelete.qty > 1) {
+      const updatedUserList = userList.map(item =>
+        item.name === foodToDelete.name ? { ...item, qty: item.qty - 1 } : item
+      );
+      setUserList(updatedUserList);
+  
+      // Call API to decrement the quantity in the database
+      await fetch('/api/foods', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: foodToDelete.name, qty: -1 }),
+      });
+    } else {
+      const updatedUserList = userList.filter(item => item.name !== foodToDelete.name);
+      setUserList(updatedUserList);
+  
+      // Call API to delete the item from the database
+      await fetch('/api/foods', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: foodToDelete.name, qty: -1 }),
+      });
     }
   }
 
