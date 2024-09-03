@@ -12,6 +12,23 @@ export default function Home() {
   // State to manage the user's food list
   const [userList, setUserList] = useState<FoodItem[]>([]);
 
+  const handleTruncate = async () => {
+    try {
+      const response = await fetch('/api/clear', {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setUserList([]);
+      }
+      
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An unexpected error occurred');
+    }
+  };
+
   async function fetchUserList() {
     try {
       const response = await fetch('/api/foods', {
@@ -122,7 +139,13 @@ export default function Home() {
   
 
   return (
-    <div className="grid grid-cols-2 h-screen w-screen">
+    <div className="grid grid-cols-2 h-screen w-screen  ">
+      <button
+        onClick={handleTruncate}
+        className="px-4 py-2 bg-black text-white absolute right-0"
+      >
+        Clear List
+      </button>
       <div className="bg-red-500 h-full p-5">
         {foodsList.map((food, index) => (
             <div className="flex justify-between w-full md:w-1/2 h-12 text-sm md:text-md lg:text-lg bg-white m-auto mb-5 p-1 lg:p-3" key={index}>
